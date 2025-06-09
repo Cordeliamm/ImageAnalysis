@@ -1,0 +1,35 @@
+def shannon_entropy(proportions):
+    proportions = proportions[proportions > 0] 
+    return -np.sum(proportions * np.log2(proportions))
+
+# Entropy per prompt_type for gender and race
+print("Shannon Entropy (Diversity) per Prompt Type:\n")
+
+for prompt in df['prompt_type'].unique():
+    subset = df[df['prompt_type'] == prompt]
+    gender_props = subset['gender'].value_counts(normalize=True)
+    gender_entropy = shannon_entropy(gender_props.values)
+    race_props = subset['race'].value_counts(normalize=True)
+    race_entropy = shannon_entropy(race_props.values)
+    
+    print(f"Prompt Type: {prompt}")
+    print(f"  Gender Diversity (Shannon Entropy): {gender_entropy:.3f}")
+    print(f"  Race Diversity (Shannon Entropy): {race_entropy:.3f}\n")
+
+    entropy_data = {
+    'Prompt Type': ['Counter', 'Inclusive', 'Neutral', 'Counter', 'Inclusive', 'Neutral'],
+    'Category': ['Gender', 'Gender', 'Gender', 'Race', 'Race', 'Race'],
+    'Shannon Entropy': [0.460, 0.672, 0.529, 1.707, 1.991, 1.780]
+}
+
+df_entropy = pd.DataFrame(entropy_data)
+plt.figure(figsize=(8, 6))
+sns.barplot(data=df_entropy, x='Prompt Type', y='Shannon Entropy', hue='Category', palette='pastel')
+
+plt.title('Shannon Entropy (Diversity) by Prompt Type and Category')
+plt.ylabel('Shannon Entropy (Higher = More Diverse)')
+plt.xlabel('Prompt Type')
+plt.ylim(0, 2.5)
+plt.legend(title='Category')
+plt.tight_layout()
+plt.show()
